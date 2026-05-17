@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>플레이브 곡 소터 (PLAVE Song Sorter)</title>
+  <title>플레이브 곡 소트 (PLAVE Song Sorter)</title>
 
   <link rel="stylesheet" type="text/css" href="src/css/reset.css">
   <link rel="stylesheet" type="text/css" href="src/css/styles.css">
@@ -16,79 +16,82 @@
   <script src="src/js/main.js"></script>
 
   <style>
-    /* 하단 가이드 글씨 완전 박멸 */
-    .info, .image.selector { display: none !important; }
-
-    /* 동방 프로젝트 이미지들이 차지하던 공간을 완전히 제로(0)로 압축 */
-    .sort.image {
-      display: none !important;
-      width: 0 !important;
-      height: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
+    /* 하단 가이드 글씨 숨김 */
+    .info, .image.selector { 
+      display: none !important; 
     }
 
-    /* 화면 전체 레이아웃 강제 정렬 */
+    /* 전체 레이아웃 중앙 정렬 */
     .container {
       max-width: 800px !important;
-      margin: 40px auto !important;
+      margin: 50px auto !important;
       padding: 0 20px !important;
       text-align: center !important;
     }
 
-    /* 소터 박스들이 세로로 길게 찢어지는 현상 절대 방지 */
-    .sorter {
-      display: block !important;
-      width: 100% !important;
-      margin: 0 auto !important;
-    }
-
-    /* 시작 버튼 디자인 강제 고정 및 간섭 차단 */
+    /* 시작 버튼 디자인 선명하게 고정 */
     .starting.start.button {
       display: block !important;
-      width: 280px !important;
-      margin: 30px auto !important;
-      padding: 20px 10px !important;
-      border: 1px solid #000 !important;
-      background: #ffffff !important;
-      cursor: pointer !important;
-      font-size: 18px !important;
-      font-weight: bold !important;
-      float: none !important;
-    }
-
-    /* 좌우 노래 선택 박스를 예쁘고 큼직한 사각형으로 강제 고정 */
-    .sort.text {
-      display: inline-flex !important;
-      width: 45% !important;
-      min-width: 250px !important;
-      height: 250px !important;
+      width: 320px !important;
+      margin: 40px auto !important;
+      padding: 25px 10px !important;
       border: 1px solid #000 !important;
       background: #ffffff !important;
       cursor: pointer !important;
       font-size: 20px !important;
       font-weight: bold !important;
+    }
+
+    /* 좌우 노래 선택 박스를 큼직한 사각형 모양으로 강제 지정 */
+    .left.sort, .right.sort {
+      display: inline-block !important;
+      width: 42% !important;
+      min-width: 250px !important;
+      height: 250px !important;
+      border: 1px solid #000 !important;
+      background: #ffffff !important;
+      margin: 15px !important;
+      padding: 0 !important;
+      position: relative !important;
+      box-sizing: border-box !important;
+      cursor: pointer !important;
+    }
+
+    /* [핵심] 프로그램이 무조건 클릭해야 하는 이미지 태그를 사각형 박스 크기만큼 전체로 늘리고, 
+       화면에는 안 보이도록 투명도(opacity)를 0으로 주어 강제로 클릭 인식을 시킵니다. */
+    .sort.image {
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      opacity: 0 !important;
+      z-index: 10 !important;
+      cursor: pointer !important;
+    }
+
+    /* 노래 제목 텍스트 위치 고정 (이미지 밑에 깔려 투표를 방해하지 않도록 처리) */
+    .sort.text {
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 10px !important;
+      display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      margin: 10px !important;
-      float: none !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      z-index: 5 !important;
+      font-size: 22px !important;
+      font-weight: bold !important;
+      color: #000 !important;
+      box-sizing: border-box !important;
     }
 
-    /* 원본 파일이 세로로 찢어놓던 스타일을 강제로 정상화 */
-    .left.sort, .right.sort {
-      display: inline !important;
-      width: auto !important;
-      height: auto !important;
-      border: none !important;
-      background: none !important;
-      float: none !important;
-    }
-
-    /* 글씨 내부 문단 클릭 방해 금지 */
-    .sort.text p { pointer-events: none !important; }
-    
-    /* 모든 버튼에 마우스 손가락 모양 강제 적용 */
-    .button, .sort.text { cursor: pointer !important; }
+    /* 모든 기능 버튼들의 마우스 포인터 손가락 모양 고정 */
+    .button { cursor: pointer !important; }
   </style>
 </head>
 
@@ -102,12 +105,13 @@
         </div>
     </div>
 
-    <div class="starting start button">플레이브 곡 소터<br><br>클릭하여 시작하기<br>(Click to Start)</div>
-
     <div class="sorter">
-        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="left sort image">
-        
-        <div class="left sort text"><p></p></div>
+        <div class="starting start button">플레이브 곡 소터<br><br>클릭하여 시작하기<br>(Click to Start)</div>
+
+        <div class="left sort">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="left sort image">
+            <div class="left sort text"><p></p></div>
+        </div>
 
         <div class="starting load button">이어하기 <span></span></div>
         <div class="loading button"><div></div><span>로딩 중...</span></div>
@@ -118,9 +122,10 @@
         <div class="finished getimg button">이미지 저장</div>
         <div class="finished list button">텍스트 리스트 생성</div>
 
-        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="right sort image">
-        
-        <div class="right sort text"><p></p></div>
+        <div class="right sort">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="right sort image">
+            <div class="right sort text"><p></p></div>
+        </div>
     </div>
 
     <div class="options"></div>
