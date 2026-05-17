@@ -18,52 +18,39 @@
   <script src="src/js/main.js"></script>
 
   <style>
-    /* 하단 쓸데없는 긴 가이드 글씨만 깔끔하게 제거 */
+    /* 하단 텍스트 가이드만 청소 */
     .info {
       display: none !important;
     }
 
-    /* PC와 모바일 모두에서 화면이 가운데에 예쁘게 정렬되도록 조정 */
-    .container {
-      max-width: 800px !important;
-      margin: 0 auto !important;
-      padding: 20px 10px;
+    /* 흉측한 동방 프로젝트 엑스박스 이미지들을 투명하게 숨김 */
+    .sort.image {
+      visibility: hidden !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
-    /* 노래를 선택하는 좌우 거대한 구역 스타일 수정 */
-    .left.sort, .right.sort {
+    /* 원본 텍스트 박스 자체를 마우스로 쉽게 누를 수 있도록 넓은 사각형 박스로 변경 */
+    .sort.text {
       border: 1px solid #000 !important;
       background: #ffffff !important;
       cursor: pointer !important;
-      padding: 20px !important;
-      min-height: 250px !important;
-    }
-
-    /* 클릭을 먹통으로 만들던 범인(이미지 태그)을 투명하게 만들어 숨기면서도, 
-       클릭 판정 영역은 넓은 사각형 전체에 그대로 살아있게 만드는 마법의 설정입니다 */
-    .sort.image {
-      opacity: 0 !important;
-      width: 100% !important;
-      height: 150px !important;
-      position: absolute !important;
-      top: 0;
-      left: 0;
-      cursor: pointer !important;
-    }
-
-    /* 노래 제목 텍스트 위치 조절 및 클릭 허용 */
-    .sort.text {
-      width: 100% !important;
-      height: auto !important;
-      border: none !important;
-      margin-top: 160px !important;
+      min-height: 300px !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
       font-size: 20px !important;
       font-weight: bold !important;
-      color: #000 !important;
-      pointer-events: none !important; /* 글자 뒤에 숨은 그림 영역이 클릭을 먹도록 처리 */
+      padding: 15px !important;
     }
 
-    /* 시작 버튼 및 기능 버튼들 마우스 포인터 손가락 모양으로 변경 */
+    /* 글자가 들어있는 내부 문단도 마우스 클릭을 방해하지 않도록 처리 */
+    .sort.text p {
+      pointer-events: none !important;
+    }
+
+    /* 시작 버튼과 모든 제어 버튼들에 손가락 마우스 포인터 적용 */
     .button {
       cursor: pointer !important;
     }
@@ -81,12 +68,9 @@
     </div>
 
     <div class="sorter">
-        <div class="left sort" style="position: relative;">
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="left sort image">
-            <div class="left sort text"><p></p></div>
-        </div>
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="left sort image">
 
-        <div class="starting start button">플레이브 곡 소터<br><br>클릭하여 시작하기 (Click to Start)</div>
+        <div class="starting start button">플레이브 곡 소터<br><br>클릭하여 시작하기<br>(Click to Start)</div>
         <div class="starting load button">이어하기 <span></span></div>
 
         <div class="loading button"><div></div><span>로딩 중...</span></div>
@@ -99,10 +83,10 @@
         <div class="finished getimg button">이미지 저장</div>
         <div class="finished list button">텍스트 리스트 생성</div>
 
-        <div class="right sort" style="position: relative;">
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="right sort image">
-            <div class="right sort text"><p></p></div>
-        </div>
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="right sort image">
+
+        <div class="left sort text"><p></p></div>
+        <div class="right sort text"><p></p></div>
     </div>
 
     <div class="options"></div>
