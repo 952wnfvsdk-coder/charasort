@@ -18,17 +18,29 @@
   <script src="src/js/main.js"></script>
 
   <style>
-    /* 그림이랑 아래 긴 설명글 싹 지우는 마법의 코드 */
-    .sort.image, .info, br {
+    /* 1. 요청하신 대로 양옆 동방 프로젝트 이미지와 하단 텍스트 가이드만 깔끔하게 숨깁니다 */
+    .sort.image, .info {
       display: none !important;
     }
-    /* 모바일 맞춤 크기 조절 */
+    
+    /* 2. 모바일 화면 크기에 딱 맞추고 불필요한 스크롤 방지 */
     .container {
       max-width: 100% !important;
-      padding: 10px;
+      padding: 15px;
     }
     .sorter {
       margin: 20px auto !important;
+    }
+
+    /* 3. 모바일에서 손가락 터치 인식이 무조건 잘 먹히도록 클릭 가능 구역으로 강제 지정 */
+    .button, .sort.text, .sort.text p {
+      cursor: pointer !important;
+      pointer-events: auto !important;
+    }
+    
+    /* 4. 모바일 터치 시 파란색 박스 생기는 잔상 지우기 */
+    * {
+      -webkit-tap-highlight-color: transparent !important;
     }
   </style>
 </head>
@@ -46,23 +58,23 @@
     <div class="sorter">
         <img src="src/assets/defaultL.jpg" class="left sort image">
 
-        <div class="starting start button" style="cursor: pointer;">플레이브 곡 소터<br><br>터치하여 시작하기</div>
-        <div class="starting load button" style="cursor: pointer;">이어하기 <span></span></div>
+        <div class="starting start button">플레이브 곡 소터<br><br>터치하여 시작하기 (Click to Start)</div>
+        <div class="starting load button">이어하기 <span></span></div>
 
         <div class="loading button"><div></div><span>로딩 중...</span></div>
 
-        <div class="sorting tie button" style="cursor: pointer;">무승부 (Tie)</div>
-        <div class="sorting undo button" style="cursor: pointer;">되돌리기 (Undo)</div>
-        <div class="sorting save button" style="cursor: pointer;">진행 상황 저장</div>
+        <div class="sorting tie button">무승부 (Tie)</div>
+        <div class="sorting undo button">되돌리기 (Undo)</div>
+        <div class="sorting save button">진행 상황 저장</div>
 
-        <div class="finished save button" style="cursor: pointer;">결과 URL 생성</div>
-        <div class="finished getimg button" style="cursor: pointer;">이미지 저장</div>
-        <div class="finished list button" style="cursor: pointer;">텍스트 리스트 생성</div>
+        <div class="finished save button">결과 URL 생성</div>
+        <div class="finished getimg button">이미지 저장</div>
+        <div class="finished list button">텍스트 리스트 생성</div>
 
         <img src="src/assets/defaultR.jpg" class="right sort image">
 
-        <div class="left sort text" style="cursor: pointer;"><p></p></div>
-        <div class="right sort text" style="cursor: pointer;"><p></p></div>
+        <div class="left sort text"><p></p></div>
+        <div class="right sort text"><p></p></div>
     </div>
 
     <div class="options"></div>
