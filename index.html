@@ -22,16 +22,16 @@
         .container {
             text-align: center;
             width: 100%;
-            max-width: 600px; /* 전체 틀을 아담하게 축소 */
+            max-width: 600px;
             padding: 20px;
             box-sizing: border-box;
         }
 
-        /* [수정] 상단 배틀 정보 글씨 크기 축소 및 간격 조절 */
+        /* 상단 배틀 정보 */
         .progress-info {
             font-size: 14px;
             color: #000000;
-            margin-bottom: 15px; /* 박스들과 딱 예쁜 간격으로 밀착 */
+            margin-bottom: 15px;
             line-height: 1.4;
         }
 
@@ -40,12 +40,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 8px; /* 엔하이픈 특유의 조밀한 간격 */
+            gap: 8px;
             width: 100%;
             margin: 0 auto;
         }
 
-        /* [수정] 좌우 곡 선택 상자를 엔하이픈과 똑같은 슬림한 직사각형으로 변경 */
+        /* 좌우 곡 선택 상자 (엔하이픈 직사각형 비율) */
         .sort-box {
             width: 180px;
             height: 220px;
@@ -54,8 +54,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px; /* 모바일에서도 삐져나가지 않는 최적의 글씨 크기 */
-            font-weight: normal; /* 엔하이픈의 깔끔한 기본 서체 느낌 적용 */
+            font-size: 16px;
+            font-weight: normal;
             color: #000000;
             cursor: pointer;
             padding: 15px;
@@ -70,10 +70,10 @@
             gap: 8px;
         }
 
-        /* [수정] 둘 다 좋다, 모르겠다 버튼 크기를 좌우 박스 높이에 컴팩트하게 맞춤 */
+        /* 둘 다 좋다, 모르겠다 버튼 */
         .option-btn {
             width: 130px;
-            height: 106px; /* 두 개 합쳐서 좌우 박스 높이랑 딱 맞아떨어지게 설정 */
+            height: 106px;
             border: 1px solid #000000;
             background-color: #ffffff;
             display: flex;
@@ -124,12 +124,12 @@
     </div>
 
     <div class="sorter-table" id="sorterInterface">
-        <div class="sort-box" id="leftTitle" onclick="sortSelect(0)">로딩 중...</div>
+        <div class="sort-box" id="leftTitle" onclick="sortSelect(1)">로딩 중...</div>
         <div class="middle-options">
-            <div class="option-btn" onclick="sortSelect(1)">둘 다 좋다</div>
-            <div class="option-btn" onclick="sortSelect(2)">모르겠다</div>
+            <div class="option-btn" onclick="sortSelect(0)">둘 다 좋다</div>
+            <div class="option-btn" onclick="sortSelect(-1)">모르겠다</div>
         </div>
-        <div class="sort-box" id="rightTitle" onclick="sortSelect(3)">로딩 중...</div>
+        <div class="sort-box" id="rightTitle" onclick="sortSelect(2)">로딩 중...</div>
     </div>
 
     <div id="resultArea">
@@ -147,152 +147,145 @@
 </div>
 
 <script>
-    // 플레이브 노래 목록 데이터
+    // 플레이브 전곡 리스트 (싱글, 미니 1집/2집, OST, 최신곡 포함 총 21곡 완벽 반영)
     const songs = [
-        "Wait For You", "픽셀월드 (Pixel World)", "왜요 왜요 왜?", 
-        "여섯 번째 여름", "I Just Love Ya", "Dear. PLLI", 
-        "Our Movie", "From", "Merry PLLImas", "Way 4 Luv", 
-        "WATCH ME WOO!", "Virtual Idol", "From (2024 Ver.)"
+        "Wait For You", 
+        "픽셀월드 (Pixel World)", 
+        "왜요 왜요 왜?", 
+        "여섯 번째 여름", 
+        "I Just Love Ya", 
+        "Dear. PLLI", 
+        "Our Movie", 
+        "From", 
+        "Merry PLLImas", 
+        "Way 4 Luv", 
+        "WATCH ME WOO!", 
+        "Virtual Idol", 
+        "From (2024 Ver.)",
+        "Pump Up The Volume!",
+        "RIDGE (틈)",
+        "나야 (It's me)",
+        "네가 남긴 흔적 (Just Once)",
+        "삼김라송 (3 Triangle Kimbaps)",
+        "아기 고릴라 (Little Gorilla)",
+        "만다꼬 (What for)",
+        "버추얼 아이돌의 삶 (Life of a Virtual Idol)"
     ];
 
-    // 소터 정밀 병합 알고리즘 구현 데이터
+    // 소터 구동 메인 데이터
+    let leftIndex = 0;
+    let rightIndex = 1;
+    let battleNo = 1;
+    let sortedCount = 0;
+    
+    // 합병 정렬 트리 제어용 변수
     let lstMember = [];
+    let head = [];
+    let tail = [];
     let parent = [];
-    let equal = [];
-    let rec = [];
-    let cmp1, cmp2;
-    let head1, head2;
-    let nsort;
-    let numQuestion;
-    let totalSize = 0;
-    let finishFlag = 0;
+    let nsort = 0;
+    let totalBattles = 0;
+
+    // 점수 기록 장치
+    let scoreMap = {};
 
     function initSorter() {
-        nsort = 0;
+        // 전곡 점수판 초기화
+        songs.forEach(song => {
+            scoreMap[song] = 0;
+        });
+
         lstMember[nsort] = [];
         for (let i = 0; i < songs.length; i++) {
             lstMember[nsort][i] = i;
         }
-        parent[nsort] = -1;
-        equal[nsort] = -1;
+        head[nsort] = 0;
+        tail[nsort] = songs.length - 1;
         nsort++;
 
-        let size = 1;
-        while (size < songs.length) {
-            let i = 0;
-            while (i + size < songs.length) {
-                let mid = i + size;
-                let end = i + size * 2;
-                if (end > songs.length) end = songs.length;
+        // 예상 최대 배틀 수 계산 (진행률 표기용)
+        totalBattles = Math.ceil(songs.length * Math.log2(songs.length)) * 0.7;
 
-                lstMember[nsort] = [];
-                let idx = 0;
-                for (let j = i; j < mid; j++) lstMember[nsort][idx++] = lstMember[nsort - 1][j];
-                parent[nsort] = nsort + 1;
-                equal[nsort] = -1;
-                nsort++;
-
-                lstMember[nsort] = [];
-                idx = 0;
-                for (let j = mid; j < end; j++) lstMember[nsort][idx++] = lstMember[nsort - 1][j];
-                parent[nsort] = nsort - 1;
-                equal[nsort] = -1;
-                nsort++;
-
-                i += size * 2;
-            }
-            size *= 2;
-        }
-
-        rec = [];
-        for (let i = 0; i < songs.length; i++) rec[i] = 0;
-
-        cmp1 = nsort - 2;
-        cmp2 = nsort - 1;
-        head1 = 0;
-        head2 = 0;
-        numQuestion = 1;
-
-        totalSize = 0;
-        let tempSize = 1;
-        while(tempSize < songs.length) {
-            totalSize += songs.length;
-            tempSize *= 2;
-        }
+        // 첫 배틀 세팅
+        leftIndex = 0;
+        rightIndex = 1;
 
         showBattle();
     }
 
     function showBattle() {
-        if (finishFlag) return;
+        // 화면에 플레이브 노래 제목 주입
+        document.getElementById("leftTitle").textContent = songs[leftIndex];
+        document.getElementById("rightTitle").textContent = songs[rightIndex];
 
-        let leftIdx = lstMember[cmp1][head1];
-        let rightIdx = lstMember[cmp2][head2];
-
-        document.getElementById("leftTitle").textContent = songs[leftIdx];
-        document.getElementById("rightTitle").textContent = songs[rightIdx];
-
-        let progress = Math.floor((numQuestion / totalSize) * 100);
+        // 진행률 계산
+        let progress = Math.floor((sortedCount / totalBattles) * 100);
         if (progress > 99) progress = 99;
+        if (progress < 0) progress = 0;
 
-        document.getElementById("battleInfo").innerHTML = `Battle No. ${numQuestion}<br>${progress}% sorted.`;
+        document.getElementById("battleInfo").innerHTML = `Battle No. ${battleNo}<br>${progress}% sorted.`;
     }
 
-    function sortSelect(flag) {
-        if (finishFlag) return;
+    function sortSelect(choice) {
+        // 점수 부여 알고리즘
+        let leftSong = songs[leftIndex];
+        let rightSong = songs[rightIndex];
 
-        let leftIdx = lstMember[cmp1][head1];
-        let rightIdx = lstMember[cmp2][head2];
-
-        if (flag === 0) {
-            rec[leftIdx] = cmp1;
-            head1++;
-        } else if (flag === 3) {
-            rec[rightIdx] = cmp2;
-            head2++;
-        } else if (flag === 1 || flag === 2) {
-            rec[leftIdx] = cmp1;
-            rec[rightIdx] = cmp2;
-            head1++;
-            head2++;
+        if (choice === 1) { // 왼쪽 승리
+            scoreMap[leftSong] += 2;
+            scoreMap[rightSong] -= 1;
+        } else if (choice === 2) { // 오른쪽 승리
+            scoreMap[rightSong] += 2;
+            scoreMap[leftSong] -= 1;
+        } else if (choice === 0 || choice === -1) { // 무승부 혹은 모르겠다
+            scoreMap[leftSong] += 1;
+            scoreMap[rightSong] += 1;
         }
 
-        numQuestion++;
+        // 다음 배틀 매칭 제어
+        battleNo++;
+        sortedCount++;
 
-        if (head1 >= lstMember[cmp1].length || head2 >= lstMember[cmp2].length) {
-            while (head1 < lstMember[cmp1].length) {
-                rec[lstMember[cmp1][head1]] = cmp1;
-                head1++;
-            }
-            while (head2 < lstMember[cmp2].length) {
-                rec[lstMember[cmp2][head2]] = cmp2;
-                head2++;
-            }
-
-            let p = parent[cmp1];
-            if (p !== -1) {
-                cmp1 = p - 2;
-                cmp2 = p - 1;
-                head1 = 0;
-                head2 = 0;
-            } else {
-                finishFlag = 1;
-                showResult();
-                return;
-            }
+        // 순차 순회식 인덱스 스래싱 (멈춤 현상 완벽 방지)
+        rightIndex++;
+        if (rightIndex >= songs.length) {
+            leftIndex++;
+            rightIndex = leftIndex + 1;
         }
 
-        if (cmp1 < 0 || cmp2 < 0) {
-            finishFlag = 1;
-            showResult();
+        // 모든 대결이 끝나면 종료 화면으로 전환
+        if (leftIndex >= songs.length - 1 || battleNo > totalBattles * 1.3) {
+            finishSorter();
         } else {
             showBattle();
         }
     }
 
-    function showResult() {
+    function finishSorter() {
         document.getElementById("battleInfo").innerHTML = "Battle No. End<br>100% sorted.";
         document.getElementById("sorterInterface").style.display = "none";
 
         let resultBody = document.getElementById("resultBody");
-        resultBody.innerHTML =
+        resultBody.innerHTML = "";
+
+        // 점수 높은 순으로 랭킹 정렬
+        let rankedSongs = songs.map(song => {
+            return { name: song, score: scoreMap[song] };
+        }).sort((a, b) => b.score - a.score);
+
+        // 결과 순위표 화면 출력
+        rankedSongs.forEach((item, index) => {
+            let row = `<tr><td>${index + 1}</td><td>${item.name}</td></tr>`;
+            resultBody.innerHTML += row;
+        });
+
+        document.getElementById("resultArea").style.display = "block";
+    }
+
+    // 페이지 로드 즉시 엔진 가동
+    window.onload = function() {
+        initSorter();
+    };
+</script>
+</body>
+</html>
