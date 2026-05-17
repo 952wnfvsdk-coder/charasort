@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="og:site_name" content="플레이브 곡 소터">
   <meta name="og:description" content="플레이브의 곡들을 정렬하고 나만의 순위를 매겨보세요.">
   <title>플레이브 곡 소터 (PLAVE Song Sorter)</title>
@@ -11,11 +12,25 @@
   <link rel="stylesheet" type="text/css" href="src/css/styles.css">
 
   <script src="src/js/data.js"></script>
-
   <script src="src/js/html2canvas.min.js"></script>
   <script src="src/js/lz-string.min.js"></script>
   <script src="src/js/seedrandom.min.js"></script>
   <script src="src/js/main.js"></script>
+
+  <style>
+    /* 그림이랑 아래 긴 설명글 싹 지우는 마법의 코드 */
+    .sort.image, .info, br {
+      display: none !important;
+    }
+    /* 모바일 맞춤 크기 조절 */
+    .container {
+      max-width: 100% !important;
+      padding: 10px;
+    }
+    .sorter {
+      margin: 20px auto !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -31,36 +46,30 @@
     <div class="sorter">
         <img src="src/assets/defaultL.jpg" class="left sort image">
 
-        <div class="starting start button">플레이브 곡 소터<br><br>Click to Start!</div>
-        <div class="starting load button">이어하기 <span></span></div>
+        <div class="starting start button" style="cursor: pointer;">플레이브 곡 소터<br><br>터치하여 시작하기</div>
+        <div class="starting load button" style="cursor: pointer;">이어하기 <span></span></div>
 
         <div class="loading button"><div></div><span>로딩 중...</span></div>
 
-        <div class="sorting tie button">무승부 (Tie)</div>
-        <div class="sorting undo button">되돌리기 (Undo)</div>
-        <div class="sorting save button">진행 상황 저장</div>
+        <div class="sorting tie button" style="cursor: pointer;">무승부 (Tie)</div>
+        <div class="sorting undo button" style="cursor: pointer;">되돌리기 (Undo)</div>
+        <div class="sorting save button" style="cursor: pointer;">진행 상황 저장</div>
 
-        <div class="finished save button">결과 URL 생성</div>
-        <div class="finished getimg button">이미지 저장</div>
-        <div class="finished list button">텍스트 리스트 생성</div>
+        <div class="finished save button" style="cursor: pointer;">결과 URL 생성</div>
+        <div class="finished getimg button" style="cursor: pointer;">이미지 저장</div>
+        <div class="finished list button" style="cursor: pointer;">텍스트 리스트 생성</div>
 
         <img src="src/assets/defaultR.jpg" class="right sort image">
 
-        <div class="left sort text"><p></p></div>
-        <div class="right sort text"><p></p></div>
+        <div class="left sort text" style="cursor: pointer;"><p></p></div>
+        <div class="right sort text" style="cursor: pointer;"><p></p></div>
     </div>
 
     <div class="options"></div>
-    <div class="image selector">결과창에 이미지 표시: </div>
+    <div class="image selector" style="display:none;">Display Images on Result: </div>
     <div class="time taken"></div>
     <div class="results"></div>
 
-    <div class="info">
-        <p><strong>플레이브(PLAVE) 곡 소터입니다. 원하는 곡 카테고리를 선택한 뒤 Start 버튼을 눌러주세요.</strong></p>
-        <p>두 곡 중 더 마음에 드는 곡을 클릭하거나, 고르기 힘들다면 무승부(Tie)를 누르시면 됩니다.</p>
-        <br>
-        <p>단축키 가이드: H 또는 왼쪽 화살표 (왼쪽 선택) / J 또는 아래 화살표 (되돌리기) / K 또는 위 화살표 (무승부) / L 또는 오른쪽 화살표 (오른쪽 선택) / S (진행 상황 저장)</p>
-    </div>
 </div>
 </body>
 
