@@ -4,8 +4,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="og:site_name" content="플레이브 곡 소터">
-  <meta name="og:description" content="플레이브의 곡들을 정렬하고 나만의 순위를 매겨보세요.">
   <title>플레이브 곡 소터 (PLAVE Song Sorter)</title>
 
   <link rel="stylesheet" type="text/css" href="src/css/reset.css">
@@ -18,42 +16,52 @@
   <script src="src/js/main.js"></script>
 
   <style>
-    /* 하단 텍스트 가이드만 청소 */
-    .info {
-      display: none !important;
-    }
+    /* 불필요한 하단 정보 제거 */
+    .info, .image.selector { display: none !important; }
 
-    /* 흉측한 동방 프로젝트 엑스박스 이미지들을 투명하게 숨김 */
+    /* 동방 프로젝트 이미지 완전히 격리 및 숨김 */
     .sort.image {
+      display: block !important;
       visibility: hidden !important;
       height: 0 !important;
       margin: 0 !important;
-      padding: 0 !important;
     }
 
-    /* 원본 텍스트 박스 자체를 마우스로 쉽게 누를 수 있도록 넓은 사각형 박스로 변경 */
+    /* 전체 레이아웃 */
+    .container {
+      max-width: 800px !important;
+      margin: 0 auto !important;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* 시작 버튼이 다른 상자에 절대 깔리지 않도록 위쪽에 큼직하게 배치 */
+    .starting.start.button {
+      display: inline-block !important;
+      margin: 20px auto !important;
+      padding: 15px 30px !important;
+      border: 1px solid #000 !important;
+      background: #fff !important;
+      cursor: pointer !important;
+      font-size: 18px !important;
+      font-weight: bold;
+    }
+
+    /* 좌우 노래 대결 박스 정석 디자인 */
     .sort.text {
       border: 1px solid #000 !important;
       background: #ffffff !important;
       cursor: pointer !important;
-      min-height: 300px !important;
+      min-height: 250px !important;
       display: flex !important;
       justify-content: center !important;
       align-items: center !important;
-      font-size: 20px !important;
+      font-size: 22px !important;
       font-weight: bold !important;
-      padding: 15px !important;
     }
 
-    /* 글자가 들어있는 내부 문단도 마우스 클릭을 방해하지 않도록 처리 */
-    .sort.text p {
-      pointer-events: none !important;
-    }
-
-    /* 시작 버튼과 모든 제어 버튼들에 손가락 마우스 포인터 적용 */
-    .button {
-      cursor: pointer !important;
-    }
+    /* 클릭 제어 */
+    .button, .sort.text { cursor: pointer !important; }
   </style>
 </head>
 
@@ -67,30 +75,28 @@
         </div>
     </div>
 
+    <div class="starting start button">플레이브 곡 소터<br><br>클릭하여 시작하기 (Click to Start)</div>
+
     <div class="sorter">
         <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="left sort image">
+        
+        <div class="left sort text"><p></p></div>
 
-        <div class="starting start button">플레이브 곡 소터<br><br>클릭하여 시작하기<br>(Click to Start)</div>
         <div class="starting load button">이어하기 <span></span></div>
-
         <div class="loading button"><div></div><span>로딩 중...</span></div>
-
         <div class="sorting tie button">무승부 (Tie)</div>
         <div class="sorting undo button">되돌리기 (Undo)</div>
         <div class="sorting save button">진행 상황 저장</div>
-
         <div class="finished save button">결과 URL 생성</div>
         <div class="finished getimg button">이미지 저장</div>
         <div class="finished list button">텍스트 리스트 생성</div>
 
         <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="right sort image">
-
-        <div class="left sort text"><p></p></div>
+        
         <div class="right sort text"><p></p></div>
     </div>
 
     <div class="options"></div>
-    <div class="image selector" style="display:none;">Display Images on Result: </div>
     <div class="time taken"></div>
     <div class="results"></div>
 
