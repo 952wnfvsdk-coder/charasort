@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>플레이브 곡 소터 (PLAVE Song Sorter)</title>
     <style>
-        /* 엔하이픈 소터와 완벽히 일치하는 미니멀 정석 디자인 */
+        /* 엔하이픈 소터와 100% 일치하는 정밀 리사이징 디자인 */
         body {
             font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
             background-color: #ffffff;
@@ -22,40 +22,40 @@
         .container {
             text-align: center;
             width: 100%;
-            max-width: 600px;
+            max-width: 600px; /* 전체 틀을 아담하게 축소 */
             padding: 20px;
             box-sizing: border-box;
         }
 
-        /* 상단 배틀 카운터 */
+        /* [수정] 상단 배틀 정보 글씨 크기 축소 및 간격 조절 */
         .progress-info {
-            font-size: 16px;
+            font-size: 14px;
             color: #000000;
-            margin-bottom: 25px;
-            line-height: 1.5;
+            margin-bottom: 15px; /* 박스들과 딱 예쁜 간격으로 밀착 */
+            line-height: 1.4;
         }
 
-        /* 메인 대결 구역 */
+        /* 메인 대결 레이아웃 */
         .sorter-table {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 8px; /* 엔하이픈 특유의 조밀한 간격 */
             width: 100%;
             margin: 0 auto;
         }
 
-        /* 좌우 곡 선택 상자 */
+        /* [수정] 좌우 곡 선택 상자를 엔하이픈과 똑같은 슬림한 직사각형으로 변경 */
         .sort-box {
-            width: 200px;
-            height: 200px;
+            width: 180px;
+            height: 220px;
             border: 1px solid #000000;
             background-color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 16px; /* 모바일에서도 삐져나가지 않는 최적의 글씨 크기 */
+            font-weight: normal; /* 엔하이픈의 깔끔한 기본 서체 느낌 적용 */
             color: #000000;
             cursor: pointer;
             padding: 15px;
@@ -63,17 +63,17 @@
             word-break: keep-all;
         }
 
-        /* 가운데 제어 버튼 묶음 */
+        /* 가운데 버튼 묶음 틀 */
         .middle-options {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
-        /* 둘 다 좋다, 모르겠다 버튼 */
+        /* [수정] 둘 다 좋다, 모르겠다 버튼 크기를 좌우 박스 높이에 컴팩트하게 맞춤 */
         .option-btn {
-            width: 140px;
-            height: 95px;
+            width: 130px;
+            height: 106px; /* 두 개 합쳐서 좌우 박스 높이랑 딱 맞아떨어지게 설정 */
             border: 1px solid #000000;
             background-color: #ffffff;
             display: flex;
@@ -90,7 +90,7 @@
             background-color: #f7f7f7;
         }
 
-        /* 결과 창 정렬 */
+        /* 결과 화면 디자인 */
         #resultArea {
             display: none;
             margin-top: 30px;
@@ -107,7 +107,8 @@
         .result-table th, .result-table td {
             border: 1px solid #000000;
             padding: 10px;
-            font-size: 16px;
+            font-size: 15px;
+            text-align: center;
         }
 
         .result-table th {
@@ -123,12 +124,12 @@
     </div>
 
     <div class="sorter-table" id="sorterInterface">
-        <div class="sort-box" id="leftTitle" onclick="sortSelect(0)"></div>
+        <div class="sort-box" id="leftTitle" onclick="sortSelect(0)">로딩 중...</div>
         <div class="middle-options">
             <div class="option-btn" onclick="sortSelect(1)">둘 다 좋다</div>
             <div class="option-btn" onclick="sortSelect(2)">모르겠다</div>
         </div>
-        <div class="sort-box" id="rightTitle" onclick="sortSelect(3)"></div>
+        <div class="sort-box" id="rightTitle" onclick="sortSelect(3)">로딩 중...</div>
     </div>
 
     <div id="resultArea">
@@ -146,15 +147,15 @@
 </div>
 
 <script>
-    // 1. 플레이브 실제 수록곡 데이터 리스트
+    // 플레이브 노래 목록 데이터
     const songs = [
         "Wait For You", "픽셀월드 (Pixel World)", "왜요 왜요 왜?", 
-        "여섯 번째 Sommer", "I Just Love Ya", "Dear. PLLI", 
+        "여섯 번째 여름", "I Just Love Ya", "Dear. PLLI", 
         "Our Movie", "From", "Merry PLLImas", "Way 4 Luv", 
         "WATCH ME WOO!", "Virtual Idol", "From (2024 Ver.)"
     ];
 
-    // 2. 다른 사람들이 쓰는 정식 오픈소스 합병 정렬(Merge Sort) 알고리즘 100% 완벽 구현
+    // 소터 정밀 병합 알고리즘 구현 데이터
     let lstMember = [];
     let parent = [];
     let equal = [];
@@ -212,9 +213,11 @@
         head2 = 0;
         numQuestion = 1;
 
-        // 진행률 계산용 값 산출
-        for (let i = 0; i < songs.length; i++) {
-            totalSize += Math.floor(Math.log2(songs.length));
+        totalSize = 0;
+        let tempSize = 1;
+        while(tempSize < songs.length) {
+            totalSize += songs.length;
+            tempSize *= 2;
         }
 
         showBattle();
@@ -226,10 +229,9 @@
         let leftIdx = lstMember[cmp1][head1];
         let rightIdx = lstMember[cmp2][head2];
 
-        document.getElementById("leftTitle").innerText = songs[leftIdx];
-        document.getElementById("rightTitle").innerText = songs[rightIdx];
+        document.getElementById("leftTitle").textContent = songs[leftIdx];
+        document.getElementById("rightTitle").textContent = songs[rightIdx];
 
-        // 정식 계산 방식으로 진행률 노출
         let progress = Math.floor((numQuestion / totalSize) * 100);
         if (progress > 99) progress = 99;
 
@@ -242,13 +244,13 @@
         let leftIdx = lstMember[cmp1][head1];
         let rightIdx = lstMember[cmp2][head2];
 
-        if (flag === 0) { // 왼쪽 선택
+        if (flag === 0) {
             rec[leftIdx] = cmp1;
             head1++;
-        } else if (flag === 3) { // 오른쪽 선택
+        } else if (flag === 3) {
             rec[rightIdx] = cmp2;
             head2++;
-        } else if (flag === 1 || flag === 2) { // 둘 다 좋다 혹은 모르겠다 (무승부 바인딩)
+        } else if (flag === 1 || flag === 2) {
             rec[leftIdx] = cmp1;
             rec[rightIdx] = cmp2;
             head1++;
@@ -257,7 +259,6 @@
 
         numQuestion++;
 
-        // 하나의 비교 배열이 완전히 소진되었을 때 트리 병합 처리
         if (head1 >= lstMember[cmp1].length || head2 >= lstMember[cmp2].length) {
             while (head1 < lstMember[cmp1].length) {
                 rec[lstMember[cmp1][head1]] = cmp1;
@@ -268,19 +269,8 @@
                 head2++;
             }
 
-            // 부모 레이어로 합치기 진행
             let p = parent[cmp1];
             if (p !== -1) {
-                let idx = 0;
-                let h1 = 0, h2 = 0;
-                let c1 = p, c2 = p + 1;
-                
-                // 임시 버퍼 데이터를 기반으로 오리지널 순위 배열 재배치 수행
-                let temp = [];
-                lstMember[c1].forEach(v => temp.push(v));
-                lstMember[c2].forEach(v => temp.push(v));
-                
-                // 최종 상위 요소 세팅 후 레벨 업스케일링
                 cmp1 = p - 2;
                 cmp2 = p - 1;
                 head1 = 0;
@@ -292,7 +282,6 @@
             }
         }
 
-        // 모든 소팅이 끝나면 결과 도출 트리거 체크
         if (cmp1 < 0 || cmp2 < 0) {
             finishFlag = 1;
             showResult();
@@ -305,5 +294,5 @@
         document.getElementById("battleInfo").innerHTML = "Battle No. End<br>100% sorted.";
         document.getElementById("sorterInterface").style.display = "none";
 
-        // 실제 토너먼트 결과를 순위표로 생성하는 구문
-        let resultBody = document.getElementById("result
+        let resultBody = document.getElementById("resultBody");
+        resultBody.innerHTML =
