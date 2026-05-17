@@ -16,51 +16,78 @@
   <script src="src/js/main.js"></script>
 
   <style>
-    /* 불필요한 하단 정보 제거 */
+    /* 하단 가이드 글씨 완전 박멸 */
     .info, .image.selector { display: none !important; }
 
-    /* 동방 프로젝트 이미지 완전히 격리 및 숨김 */
+    /* 동방 프로젝트 이미지들이 차지하던 공간을 완전히 제로(0)로 압축 */
     .sort.image {
-      display: block !important;
-      visibility: hidden !important;
+      display: none !important;
+      width: 0 !important;
       height: 0 !important;
       margin: 0 !important;
+      padding: 0 !important;
     }
 
-    /* 전체 레이아웃 */
+    /* 화면 전체 레이아웃 강제 정렬 */
     .container {
       max-width: 800px !important;
+      margin: 40px auto !important;
+      padding: 0 20px !important;
+      text-align: center !important;
+    }
+
+    /* 소터 박스들이 세로로 길게 찢어지는 현상 절대 방지 */
+    .sorter {
+      display: block !important;
+      width: 100% !important;
       margin: 0 auto !important;
-      padding: 20px;
-      text-align: center;
     }
 
-    /* 시작 버튼이 다른 상자에 절대 깔리지 않도록 위쪽에 큼직하게 배치 */
+    /* 시작 버튼 디자인 강제 고정 및 간섭 차단 */
     .starting.start.button {
-      display: inline-block !important;
-      margin: 20px auto !important;
-      padding: 15px 30px !important;
-      border: 1px solid #000 !important;
-      background: #fff !important;
-      cursor: pointer !important;
-      font-size: 18px !important;
-      font-weight: bold;
-    }
-
-    /* 좌우 노래 대결 박스 정석 디자인 */
-    .sort.text {
+      display: block !important;
+      width: 280px !important;
+      margin: 30px auto !important;
+      padding: 20px 10px !important;
       border: 1px solid #000 !important;
       background: #ffffff !important;
       cursor: pointer !important;
-      min-height: 250px !important;
-      display: flex !important;
-      justify-content: center !important;
-      align-items: center !important;
-      font-size: 22px !important;
+      font-size: 18px !important;
       font-weight: bold !important;
+      float: none !important;
     }
 
-    /* 클릭 제어 */
+    /* 좌우 노래 선택 박스를 예쁘고 큼직한 사각형으로 강제 고정 */
+    .sort.text {
+      display: inline-flex !important;
+      width: 45% !important;
+      min-width: 250px !important;
+      height: 250px !important;
+      border: 1px solid #000 !important;
+      background: #ffffff !important;
+      cursor: pointer !important;
+      font-size: 20px !important;
+      font-weight: bold !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 10px !important;
+      float: none !important;
+    }
+
+    /* 원본 파일이 세로로 찢어놓던 스타일을 강제로 정상화 */
+    .left.sort, .right.sort {
+      display: inline !important;
+      width: auto !important;
+      height: auto !important;
+      border: none !important;
+      background: none !important;
+      float: none !important;
+    }
+
+    /* 글씨 내부 문단 클릭 방해 금지 */
+    .sort.text p { pointer-events: none !important; }
+    
+    /* 모든 버튼에 마우스 손가락 모양 강제 적용 */
     .button, .sort.text { cursor: pointer !important; }
   </style>
 </head>
@@ -75,7 +102,7 @@
         </div>
     </div>
 
-    <div class="starting start button">플레이브 곡 소터<br><br>클릭하여 시작하기 (Click to Start)</div>
+    <div class="starting start button">플레이브 곡 소터<br><br>클릭하여 시작하기<br>(Click to Start)</div>
 
     <div class="sorter">
         <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="left sort image">
