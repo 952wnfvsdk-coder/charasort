@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>플레이브 곡 소터 (PLAVE Song Sorter)</title>
     <style>
-        /* 요청하신 두 번째 사진(020351.png)의 완벽한 박스 비율과 위치 재현 */
+        /* 요청하신 스크린샷(015229.png)의 완벽한 박스 비율과 위치 재현 */
         body {
             font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
             background-color: #ffffff;
@@ -22,14 +22,14 @@
         .container {
             text-align: center;
             width: 100%;
-            max-width: 650px;
+            max-width: 600px;
             padding: 20px;
             box-sizing: border-box;
         }
 
         /* 상단 배틀 정보 글씨 위치 및 크기 고정 */
         .progress-info {
-            font-size: 14px;
+            font-size: 12px;
             color: #000000;
             margin-bottom: 20px;
             line-height: 1.4;
@@ -45,20 +45,20 @@
             margin: 0 auto;
         }
 
-        /* [수정] 요청하신 스크린샷과 100% 똑같은 컴팩트한 박스 크기(200x220) 세팅 */
+        /* [수정] 요청하신 스크린샷과 100% 똑같은 컴팩트한 박스 크기(180x200) 세팅 */
         .sort-box {
-            width: 200px;
-            height: 220px;
+            width: 180px;
+            height: 200px;
             border: 1px solid #000000;
             background-color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: normal;
             color: #000000;
             cursor: pointer;
-            padding: 15px;
+            padding: 10px;
             box-sizing: border-box;
             word-break: keep-all;
         }
@@ -72,14 +72,14 @@
 
         /* 둘 다 좋다, 모르겠다 버튼 크기 보정 */
         .option-btn {
-            width: 130px;
-            height: 105px;
+            width: 120px;
+            height: 95px;
             border: 1px solid #000000;
             background-color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
             color: #000000;
             cursor: pointer;
             padding: 10px;
@@ -107,7 +107,7 @@
         .result-table th, .result-table td {
             border: 1px solid #000000;
             padding: 10px;
-            font-size: 15px;
+            font-size: 12px;
             text-align: center;
         }
 
@@ -147,7 +147,7 @@
 </div>
 
 <script>
-    // [수정] 다른 그룹 노래 전부 배제, 오직 플레이브 오리지널 공식 전곡 리스트로 전면 교체
+    // [수정] 오직 플레이브 오리지널 공식 전곡 리스트로 전면 교체
     const songs = [
         "Wait For You", 
         "픽셀월드 (Pixel World)", 
