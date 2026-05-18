@@ -141,11 +141,10 @@
 
     <script>
    
-   <script>
-   
-    // 플레이브 노래 목록 (33곡이든 몇 곡이든 여기에 쭉 유지하시면 됩니다)
+
+    // 플레이브 노래 목록 (33곡이 여기에 그대로 유지되어 있으면 됩니다)
     const songs = [
-       "기다릴게", 
+        "기다릴게", 
         "Pixel World", 
         "왜요 왜요 왜?", 
         "여섯 번째 여름", 
@@ -178,97 +177,151 @@
     "Born Savage",
     "Lunar Hearts",
     "그런 것 같아"
-        // 추가하신 나머지 곡들을 이 아래에 그대로 두시면 됩니다!
+        // 추가하신 나머지 곡들이 이 아래로 쭉 들어있으면 됩니다!
     ];
 
+    // 엔하이픈 소터 표준 병합 정렬 알고리즘
     let battleNo = 1;
     let scoreMap = {};
-    let totalBattles = 0;
-    let battlePairs = [];
-    let currentPairIndex = 0;
+    
+    let mainList = [];
+    let subList = [];
+    let headLeft = 0;
+    let headRight = 0;
+    let mid = null;
+    let pairList = [];
+    let finishFlag = false;
 
     function initSorter() {
         songs.forEach(song => { scoreMap[song] = 0; });
-
-        let tempPairs = [];
-        // 1. 모든 가능한 대결 조합 생성
-        for (let i = 0; i < songs.length; i++) {
-            for (let j = i + 1; j < songs.length; j++) {
-                tempPairs.push([i, j]);
-            }
-        }
-
-        // 2. [핵심] 징검다리식 고정 분산 알고리즘 (새로고침해도 순서 100% 동일)
-        // 대진표가 연속되지 않도록 일정한 수학적 간격(소수 활용)으로 건너뛰며 재배치합니다.
-        // 이 방식은 연산이 필요 없어 무한 루프가 절대 발생하지 않으며, 양쪽이 무조건 동시에 바뀝니다.
-        let len = tempPairs.length;
-        let step = 37; // 대진을 일정하게 분산시키기 위한 고정 프라임 스텝
-        if (step >= len) step = 1;
-
-        let mark = new Array(len).fill(false);
-        let idx = 0;
-
-        for (let i = 0; i < len; i++) {
-            while (mark[idx]) {
-                idx = (idx + 1) % len;
-            }
-            battlePairs.push(tempPairs[idx]);
-            mark[idx] = true;
-            idx = (idx + step) % len;
-        }
-
-        totalBattles = battlePairs.length;
-        showBattle();
+        
+        // 새로고침해도 늘 songs 배열 순서대로 정직하게 시작하도록 고정합니다.
+        mainList = songs.map((song, idx) => [idx]);
+        subList = [];
+        
+        prepareNextMerge();
     }
 
-    function showBattle() {
-        if (currentPairIndex >= totalBattles) {
+    function prepareNextMerge() {
+        if (mainList.length <= 1) {
             finishSorter();
             return;
         }
+        subList = [];
+        executeMergeStep();
+    }
 
-        let pair = battlePairs[currentPairIndex];
-        document.getElementById("leftTitle").textContent = songs[pair[0]];
-        document.getElementById("rightTitle").textContent = songs[pair[1]];
+    function executeMergeStep() {
+        if (mainList.length >= 2) {
+            let leftArr = mainList.shift();
+            let rightArr = mainList.shift();
+            pairList = [leftArr, rightArr];
+            headLeft = 0;
+            headRight = 0;
+            showBattle();
+        } else if (mainList.length === 1) {
+            subList.push(mainList.shift());
+            if (mainList.length === 0) {
+                mainList = subList;
+                prepareNextMerge();
+            }
+        } else {
+            mainList = subList;
+            prepareNextMerge();
+        }
+    }
 
-        // 진행률 표시
-        let progress = Math.floor((currentPairIndex / totalBattles) * 100);
+    function showBattle() {
+        if (finishFlag) return;
+        
+        let leftSongIdx = pairList[0][headLeft];
+        let rightSongIdx = pairList[1][headRight];
+
+        document.getElementById("leftTitle").textContent = songs[leftSongIdx];
+        document.getElementById("rightTitle").textContent = songs[rightSongIdx];
+
+        // 33곡 기준 약 120~130판 내외로 끝나는 진행률 계산
+        let totalEstimated = Math.ceil(songs.length * Math.log2(songs.length)) * 0.74;
+        let progress = Math.min(99, Math.floor((battleNo / totalEstimated) * 100));
+        if (progress < 0) progress = 0;
+
         document.getElementById("battleInfo").innerHTML = `Battle No. ${battleNo}<br>${progress}% sorted.`;
     }
 
     function sortSelect(choice) {
-        if (currentPairIndex >= totalBattles) return;
+        if (finishFlag) return;
 
-        let pair = battlePairs[currentPairIndex];
-        let leftSong = songs[pair[0]];
-        let rightSong = songs[pair[1]];
+        let leftArr = pairList[0];
+        let rightArr = pairList[1];
+        
+        if (!mid) mid = [];
 
         if (choice === 1) {
-            scoreMap[leftSong] += 2;
-            scoreMap[rightSong] -= 1;
+            scoreMap[songs[leftArr[headLeft]]] += 2;
+            mid.push(leftArr[headLeft]);
+            headLeft++;
         } else if (choice === 2) {
-            scoreMap[rightSong] += 2;
-            scoreMap[leftSong] -= 1;
+            scoreMap[songs[rightArr[headRight]]] += 2;
+            mid.push(rightArr[headRight]);
+            headRight++;
         } else {
-            scoreMap[leftSong] += 1;
-            scoreMap[rightSong] += 1;
+            scoreMap[songs[leftArr[headLeft]]] += 1;
+            scoreMap[songs[rightArr[headRight]]] += 1;
+            mid.push(leftArr[headLeft]);
+            mid.push(rightArr[headRight]);
+            headLeft++;
+            headRight++;
         }
 
         battleNo++;
-        currentPairIndex++;
-        showBattle();
+
+        if (headLeft >= leftArr.length || headRight >= rightArr.length) {
+            while (headLeft < leftArr.length) {
+                mid.push(leftArr[headLeft]);
+                headLeft++;
+            }
+            while (headRight < rightArr.length) {
+                mid.push(rightArr[headRight]);
+                headRight++;
+            }
+            
+            subList.push(mid);
+            mid = null;
+
+            if (mainList.length === 0) {
+                mainList = subList;
+                if (mainList.length <= 1) {
+                    finishSorter();
+                    return;
+                }
+                subList = [];
+            }
+            executeMergeStep();
+        } else {
+            showBattle();
+        }
     }
 
     function finishSorter() {
+        finishFlag = true;
         document.getElementById("battleInfo").innerHTML = "Battle No. End<br>100% sorted.";
         document.getElementById("sorterInterface").style.display = "none";
 
         let resultBody = document.getElementById("resultBody");
         resultBody.innerHTML = "";
 
-        let rankedSongs = songs.map(song => {
-            return { name: song, score: scoreMap[song] };
-        }).sort((a, b) => b.score - a.score);
+        let finalOrder = mainList[0] || [];
+        let rankedSongs = finalOrder.map(idx => {
+            return { name: songs[idx], score: scoreMap[songs[idx]] };
+        });
+
+        rankedSongs.sort((a, b) => b.score - a.score);
+
+        songs.forEach(song => {
+            if (!rankedSongs.some(item => item.name === song)) {
+                rankedSongs.push({ name: song, score: scoreMap[song] });
+            }
+        });
 
         rankedSongs.forEach((item, index) => {
             let row = `<tr><td>${index + 1}</td><td>${item.name}</td></tr>`;
