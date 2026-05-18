@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>플레이브 곡 소터 (PLAVE Song Sorter)</title>
     <style>
-        /* 요청하신 상단 고정 미니멀 레이아웃 */
         body {
             font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
             background-color: #ffffff;
@@ -44,7 +43,6 @@
             margin: 0 auto;
         }
 
-        /* 가로 140px, 세로 160px 컴팩트 박스 크기 유지 */
         .sort-box {
             width: 140px;
             height: 160px;
@@ -143,7 +141,6 @@
 </div>
 
 <script>
-    // 플레이브 공식 전곡 리스트
     const songs = [
         "Wait For You", 
         "픽셀월드 (Pixel World)", 
@@ -168,14 +165,15 @@
     let battlePairs = [];
     let currentPairIndex = 0;
 
-    // 모든 가능한 대결 쌍을 만들고 무작위로 섞는 알고리즘
+    // 방금 대결에 등장했던 곡 번호 저장용 변수
+    let lastLeftIdx = -1;
+    let lastRightIdx = -1;
+
     function initSorter() {
         songs.forEach(song => { scoreMap[song] = 0; });
 
-        // 1. 모든 곡의 대결 조합 생성 (예: 15곡이면 총 105개의 대결)
         for (let i = 0; i < songs.length; i++) {
             for (let j = i + 1; j < songs.length; j++) {
-                // 왼쪽/오른쪽도 랜덤하게 배치하기 위해 50% 확률로 순서 섞음
                 if (Math.random() > 0.5) {
                     battlePairs.push([i, j]);
                 } else {
@@ -184,7 +182,7 @@
             }
         }
 
-        // 2. 생성된 대결 묶음 전체를 완전 무작위로 shuffle (한쪽만 안 바뀌는 현상 100% 차단)
+        // 초기 셔플
         for (let i = battlePairs.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [battlePairs[i], battlePairs[j]] = [battlePairs[j], battlePairs[i]];
@@ -195,12 +193,35 @@
     }
 
     function showBattle() {
-        if (currentPairIndex >= totalBattles) {
+        if (currentPairIndex >= battlePairs.length) {
             finishSorter();
             return;
         }
 
-        let pair = battlePairs[currentPairIndex];
+        // [핵심 로직] 현재 대결에 방금 전 곡이 포함되어 있는지 검사
+        let targetIndex = currentPairIndex;
+        let pair = battlePairs[targetIndex];
+
+        // 대결 리스트의 끝자락이 아니라면, 연속된 곡이 안 나오도록 뒤쪽 리스트 탐색
+        while (targetIndex < battlePairs.length - 1 && 
+              (pair[0] === lastLeftIdx || pair[0] === lastRightIdx || 
+               pair[1] === lastLeftIdx || pair[1] === lastRightIdx)) {
+            targetIndex++;
+            pair = battlePairs[targetIndex];
+        }
+
+        // 만약 조건에 맞는 카드를 뒤에서 찾았다면, 현재 순서와 맞바꿈
+        if (targetIndex !== currentPairIndex && targetIndex < battlePairs.length) {
+            let temp = battlePairs[currentPairIndex];
+            battlePairs[currentPairIndex] = battlePairs[targetIndex];
+            battlePairs[targetIndex] = temp;
+            pair = battlePairs[currentPairIndex];
+        }
+
+        // 현재 선택된 대결의 곡 번호를 기억
+        lastLeftIdx = pair[0];
+        lastRightIdx = pair[1];
+
         document.getElementById("leftTitle").textContent = songs[pair[0]];
         document.getElementById("rightTitle").textContent = songs[pair[1]];
 
@@ -238,7 +259,6 @@
         let resultBody = document.getElementById("resultBody");
         resultBody.innerHTML = "";
 
-        // 점수 기준으로 최종 순위 생성
         let rankedSongs = songs.map(song => {
             return { name: song, score: scoreMap[song] };
         }).sort((a, b) => b.score - a.score);
