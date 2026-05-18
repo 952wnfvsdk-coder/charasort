@@ -114,7 +114,7 @@
 
 <div class="container">
     <div class="progress-info" id="battleInfo">
-        Battle No. 1<br>0% sorted.
+        로딩 중...
     </div>
 
     <div class="sorter-table" id="sorterInterface">
@@ -141,6 +141,7 @@
 </div>
 
 <script>
+    // 플레이브 현재 곡 목록 (나중에 곡을 마음껏 늘리셔도 100% 동시 교체됩니다!)
     const songs = [
         "Wait For You", 
         "픽셀월드 (Pixel World)", 
@@ -159,112 +160,116 @@
         "RIDGE (틈)"
     ];
 
+    let currentRoundSongs = []; // 현재 라운드 진행 중인 곡들
+    let nextRoundSongs = [];    // 이겨서 다음 라운드로 올라간 곡들
+    let droppedSongs = [];     // 떨어진 곡들 (순위 매기기용)
+    
+    let roundName = "";         // 16강, 8강 등 라운드 표시
+    let matchIndex = 0;         // 현재 라운드의 몇 번째 매치인지
+    let totalMatchesInRound = 0;// 현재 라운드의 총 매치 수
     let battleNo = 1;
-    let scoreMap = {};
-    let totalBattles = 0;
-    let battlePairs = [];
-    let currentPairIndex = 0;
-
-    // 방금 대결에 등장했던 곡 번호 저장용 변수
-    let lastLeftIdx = -1;
-    let lastRightIdx = -1;
 
     function initSorter() {
-        songs.forEach(song => { scoreMap[song] = 0; });
-
-        for (let i = 0; i < songs.length; i++) {
-            for (let j = i + 1; j < songs.length; j++) {
-                if (Math.random() > 0.5) {
-                    battlePairs.push([i, j]);
-                } else {
-                    battlePairs.push([j, i]);
-                }
-            }
-        }
-
-        // 초기 셔플
-        for (let i = battlePairs.length - 1; i > 0; i--) {
+        // 1. 처음 시작할 때 곡 목록을 복사하고 무작위로 셔플
+        currentRoundSongs = [...songs];
+        for (let i = currentRoundSongs.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [battlePairs[i], battlePairs[j]] = [battlePairs[j], battlePairs[i]];
+            [currentRoundSongs[i], currentRoundSongs[j]] = [currentRoundSongs[j], currentRoundSongs[i]];
+        }
+        
+        // 15곡일 경우 1개 곡은 부전승으로 다음 라운드 미리 진출
+        if (currentRoundSongs.length % 2 !== 0) {
+            nextRoundSongs.push(currentRoundSongs.pop());
         }
 
-        totalBattles = battlePairs.length;
+        matchIndex = 0;
+        totalMatchesInRound = currentRoundSongs.length / 2;
+        updateRoundName();
         showBattle();
     }
 
+    function updateRoundName() {
+        let totalCount = currentRoundSongs.length + nextRoundSongs.length;
+        if (totalCount > 8 && totalCount <= 16) roundName = "16강전";
+        else if (totalCount > 4 && totalCount <= 8) roundName = "8강전";
+        else if (totalCount > 2 && totalCount <= 4) roundName = "4강전";
+        else if (totalCount === 2) roundName = "결승전";
+    }
+
     function showBattle() {
-        if (currentPairIndex >= battlePairs.length) {
-            finishSorter();
-            return;
+        if (matchIndex >= totalMatchesInRound) {
+            // 해당 라운드가 끝나면 다음 라운드로 전환
+            currentRoundSongs = [...nextRoundSongs];
+            nextRoundSongs = [];
+            
+            // 다음 라운드 대진도 랜덤하게 섞음
+            for (let i = currentRoundSongs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentRoundSongs[i], currentRoundSongs[j]] = [currentRoundSongs[j], currentRoundSongs[i]];
+            }
+
+            if (currentRoundSongs.length === 1) {
+                finishSorter();
+                return;
+            }
+
+            // 홀수 번 남으면 또 1곡 부전승 처리
+            if (currentRoundSongs.length % 2 !== 0) {
+                nextRoundSongs.push(currentRoundSongs.pop());
+            }
+
+            matchIndex = 0;
+            totalMatchesInRound = currentRoundSongs.length / 2;
+            updateRoundName();
         }
 
-        // [핵심 로직] 현재 대결에 방금 전 곡이 포함되어 있는지 검사
-        let targetIndex = currentPairIndex;
-        let pair = battlePairs[targetIndex];
+        let leftSong = currentRoundSongs[matchIndex * 2];
+        let rightSong = currentRoundSongs[matchIndex * 2 + 1];
 
-        // 대결 리스트의 끝자락이 아니라면, 연속된 곡이 안 나오도록 뒤쪽 리스트 탐색
-        while (targetIndex < battlePairs.length - 1 && 
-              (pair[0] === lastLeftIdx || pair[0] === lastRightIdx || 
-               pair[1] === lastLeftIdx || pair[1] === lastRightIdx)) {
-            targetIndex++;
-            pair = battlePairs[targetIndex];
-        }
+        document.getElementById("leftTitle").textContent = leftSong;
+        document.getElementById("rightTitle").textContent = rightSong;
 
-        // 만약 조건에 맞는 카드를 뒤에서 찾았다면, 현재 순서와 맞바꿈
-        if (targetIndex !== currentPairIndex && targetIndex < battlePairs.length) {
-            let temp = battlePairs[currentPairIndex];
-            battlePairs[currentPairIndex] = battlePairs[targetIndex];
-            battlePairs[targetIndex] = temp;
-            pair = battlePairs[currentPairIndex];
-        }
-
-        // 현재 선택된 대결의 곡 번호를 기억
-        lastLeftIdx = pair[0];
-        lastRightIdx = pair[1];
-
-        document.getElementById("leftTitle").textContent = songs[pair[0]];
-        document.getElementById("rightTitle").textContent = songs[pair[1]];
-
-        let progress = Math.floor((currentPairIndex / totalBattles) * 100);
-        document.getElementById("battleInfo").innerHTML = `Battle No. ${battleNo}<br>${progress}% sorted.`;
+        document.getElementById("battleInfo").innerHTML = `${roundName} - Match ${matchIndex + 1}<br>Battle No. ${battleNo}`;
     }
 
     function sortSelect(choice) {
-        if (currentPairIndex >= totalBattles) return;
-
-        let pair = battlePairs[currentPairIndex];
-        let leftSong = songs[pair[0]];
-        let rightSong = songs[pair[1]];
+        let leftSong = currentRoundSongs[matchIndex * 2];
+        let rightSong = currentRoundSongs[matchIndex * 2 + 1];
 
         if (choice === 1) {
-            scoreMap[leftSong] += 2;
-            scoreMap[rightSong] -= 1;
+            nextRoundSongs.push(leftSong);      // 왼쪽 승리
+            droppedSongs.unshift(rightSong);   // 오른쪽 탈락 (순위 높은 탈락자일수록 앞에 배치)
         } else if (choice === 2) {
-            scoreMap[rightSong] += 2;
-            scoreMap[leftSong] -= 1;
+            nextRoundSongs.push(rightSong);     // 오른쪽 승리
+            droppedSongs.unshift(leftSong);    // 왼쪽 탈락
         } else {
-            scoreMap[leftSong] += 1;
-            scoreMap[rightSong] += 1;
+            // 둘다 좋다/모르겠다일 경우 랜덤으로 한 명 올림
+            if (Math.random() > 0.5) {
+                nextRoundSongs.push(leftSong);
+                droppedSongs.unshift(rightSong);
+            } else {
+                nextRoundSongs.push(rightSong);
+                droppedSongs.unshift(leftSong);
+            }
         }
 
         battleNo++;
-        currentPairIndex++;
+        matchIndex++;
         showBattle();
     }
 
     function finishSorter() {
-        document.getElementById("battleInfo").innerHTML = "Battle No. End<br>100% sorted.";
+        document.getElementById("battleInfo").innerHTML = "소터 완료!<br>100% sorted.";
         document.getElementById("sorterInterface").style.display = "none";
 
         let resultBody = document.getElementById("resultBody");
         resultBody.innerHTML = "";
 
-        let rankedSongs = songs.map(song => {
-            return { name: song, score: scoreMap[song] };
-        }).sort((a, b) => b.score - a.score);
+        // 최종 우승곡을 맨 앞에 추가
+        let finalRank = [currentRoundSongs[0], ...droppedSongs];
 
-        rankedSongs.forEach((item, index) => {
-            let row = `<tr><td>${index + 1}</td><td>${item.name}</td></tr>`;
+        finalRank.forEach((song, index) => {
+            let row = `<tr><td>${index + 1}</td><td>${song}</td></tr>`;
             resultBody.innerHTML += row;
         });
 
