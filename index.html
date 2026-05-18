@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>플레이브 곡 소터 (PLAVE Song Sorter)</title>
     <style>
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Malgun Gothic", sans-serif;
             background-color: #ffffff;
@@ -14,8 +15,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding-top: 50px;
-            min-height: 100vh;
+            padding-top: 20px;       /* 위쪽 끝으로 바짝 올림 */
+            min-height: auto;        /* 화면 한가운데로 주저앉는 현상 방지 */
             user-select: none;
         }
 
@@ -23,7 +24,7 @@
             text-align: center;
             width: 100%;
             max-width: 500px;
-            padding: 10px;
+            padding: 0px;            /* 상단 여백 추가 압축 */
             box-sizing: border-box;
         }
 
@@ -31,60 +32,54 @@
             font-size: 11px;
             color: #000000;
             margin-bottom: 15px;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .sorter-table {
-           
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;            /* 간격 10 */
-
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;            /* 가로 간격 10px 실측 반영 */
+            width: 100%;
+            margin: 0 auto;
         }
 
         .sort-box {
-           
-    width: 130px;         /* 가로 130 */
-    height: 160px;        /* 세로 160 */
-    border: 1px solid #000000;
-    background-color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;       /* 글씨 크기 12 */
-    font-weight: normal;
-    color: #000000;
-    cursor: pointer;
-    padding: 10px;
-    box-sizing: border-box;
-    word-break: keep-all;
-
-
+            width: 130px;         /* 노래 박스 가로 130px */
+            height: 160px;        /* 노래 박스 세로 160px */
+            border: 1px solid #000000;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;       /* 노래 제목 글씨 크기 12px */
+            font-weight: normal;
+            color: #000000;
+            cursor: pointer;
+            padding: 10px;
+            box-sizing: border-box;
+            word-break: keep-all;
         }
 
         .middle-options {
-           
-    display: flex;
-    flex-direction: column;
-    gap: 10px;            /* 간격 10 */
-
+            display: flex;
+            flex-direction: column;
+            gap: 10px;            /* 세로 간격 10px 실측 반영 */
         }
 
         .option-btn {
-          
-    width: 130px;         /* 가로 130 */
-    height: 75px;         /* 세로 75 */
-    border: 1px solid #000000;
-    background-color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;       /* 글씨 크기 11 */
-    color: #000000;
-    cursor: pointer;
-    padding: 5px;
-    box-sizing: border-box;
+            width: 130px;         /* 가운데 버튼 가로 130px */
+            height: 75px;         /* 가운데 버튼 세로 75px */
+            border: 1px solid #000000;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;       /* 버튼 글씨 크기 11px */
+            color: #000000;
+            cursor: pointer;
+            padding: 5px;
+            box-sizing: border-box;
         }
 
         .sort-box:hover, .option-btn:hover {
@@ -93,13 +88,13 @@
 
         #resultArea {
             display: none;
-            margin-top: 20px;
+            margin-top: 30px;
             width: 100%;
         }
 
         .result-table {
             width: 100%;
-            max-width: 350px;
+            max-width: 300px;
             margin: 15px auto;
             border-collapse: collapse;
         }
@@ -114,6 +109,7 @@
         .result-table th {
             background-color: #f5f5f5;
         }
+    
     </style>
 </head>
 <body>
