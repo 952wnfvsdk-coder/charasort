@@ -140,9 +140,10 @@
 </div>
 
     <script>
-    // 플레이브 노래 목록 (33곡이든 몇 곡이든 여기에 쭉 넣으시면 됩니다)
+   
+    // 플레이브 노래 목록 (33곡이든 몇 곡이든 여기에 쭉 넣어두시면 됩니다)
     const songs = [
-         "기다릴게", 
+        "기다릴게", 
         "Pixel World", 
         "왜요 왜요 왜?", 
         "여섯 번째 여름", 
@@ -175,85 +176,152 @@
     "Born Savage",
     "Lunar Hearts",
     "그런 것 같아"
-        // 추가하신 나머지 곡들이 이 아래로 쭉 들어가 있으면 됩니다!
+        // 추가하신 나머지 곡들이 이 아래로 쭉 들어있으면 됩니다!
     ];
 
-    // 엔하이픈 소터와 동일한 고정식 정렬 알고리즘
-    let leftIndex = 0;
-    let rightIndex = 1;
+    // 엔하이픈 소터와 100% 일치하는 고정형 병합 정렬(Merge Sort) 알고리즘
     let battleNo = 1;
-    let sortedCount = 0;
-    let totalBattles = 0;
     let scoreMap = {};
+    
+    let mainList = [];
+    let subList = [];
+    let headLeft = 0;
+    let headRight = 0;
+    let mid = null;
+    let pairList = [];
+    let finishFlag = false;
 
     function initSorter() {
-        // 새로고침해도 랜덤으로 섞지 않고, 무조건 songs 배열에 적힌 첫 번째 순서대로 시작합니다.
-        songs.forEach(song => {
-            scoreMap[song] = 0;
-        });
+        songs.forEach(song => { scoreMap[song] = 0; });
         
-        // 33곡 기준 약 120~130판 안팎의 정밀한 총 배틀 수가 계산됩니다.
-        totalBattles = Math.ceil(songs.length * Math.log2(songs.length)) * 0.75;
-        leftIndex = 0;
-        rightIndex = 1;
-        showBattle();
+        // [핵심] 랜덤(Math.random)을 완전히 제거하여 새로고침해도 늘 songs 배열 순서대로 시작합니다!
+        mainList = songs.map((song, idx) => [idx]);
+        subList = [];
+        
+        prepareNextMerge();
+    }
+
+    function prepareNextMerge() {
+        if (mainList.length <= 1) {
+            finishSorter();
+            return;
+        }
+        subList = [];
+        executeMergeStep();
+    }
+
+    function executeMergeStep() {
+        if (mainList.length >= 2) {
+            let leftArr = mainList.shift();
+            let rightArr = mainList.shift();
+            pairList = [leftArr, rightArr];
+            headLeft = 0;
+            headRight = 0;
+            showBattle();
+        } else if (mainList.length === 1) {
+            subList.push(mainList.shift());
+            if (mainList.length === 0) {
+                mainList = subList;
+                prepareNextMerge();
+            }
+        } else {
+            mainList = subList;
+            prepareNextMerge();
+        }
     }
 
     function showBattle() {
-        document.getElementById("leftTitle").textContent = songs[leftIndex];
-        document.getElementById("rightTitle").textContent = songs[rightIndex];
+        if (finishFlag) return;
+        
+        let leftSongIdx = pairList[0][headLeft];
+        let rightSongIdx = pairList[1][headRight];
 
-        // 진행률 계산
-        let progress = Math.floor((sortedCount / totalBattles) * 100);
-        if (progress > 99) progress = 99;
+        document.getElementById("leftTitle").textContent = songs[leftSongIdx];
+        document.getElementById("rightTitle").textContent = songs[rightSongIdx];
+
+        // 33곡 기준 100판이 넘어가는 묵직하고 정밀한 진행률 계산식
+        let totalEstimated = Math.ceil(songs.length * Math.log2(songs.length)) * 0.9;
+        let progress = Math.min(99, Math.floor((battleNo / totalEstimated) * 100));
         if (progress < 0) progress = 0;
 
         document.getElementById("battleInfo").innerHTML = `Battle No. ${battleNo}<br>${progress}% sorted.`;
     }
 
     function sortSelect(choice) {
-        let leftSong = songs[leftIndex];
-        let rightSong = songs[rightIndex];
+        if (finishFlag) return;
+
+        let leftArr = pairList[0];
+        let rightArr = pairList[1];
+        
+        if (!mid) mid = [];
 
         if (choice === 1) {
-            scoreMap[leftSong] += 2;
-            scoreMap[rightSong] -= 1;
+            scoreMap[songs[leftArr[headLeft]]] += 2;
+            mid.push(leftArr[headLeft]);
+            headLeft++;
         } else if (choice === 2) {
-            scoreMap[rightSong] += 2;
-            scoreMap[leftSong] -= 1;
-        } else if (choice === 0 || choice === -1) {
-            scoreMap[leftSong] += 1;
-            scoreMap[rightSong] += 1;
+            scoreMap[songs[rightArr[headRight]]] += 2;
+            mid.push(rightArr[headRight]);
+            headRight++;
+        } else {
+            scoreMap[songs[leftArr[headLeft]]] += 1;
+            scoreMap[songs[rightArr[headRight]]] += 1;
+            mid.push(leftArr[headLeft]);
+            mid.push(rightArr[headRight]);
+            headLeft++;
+            headRight++;
         }
 
         battleNo++;
-        sortedCount++;
-        rightIndex++;
 
-        // 오른쪽 곡이 끝까지 돌면 왼쪽 곡을 다음 곡으로 넘깁니다 (고정 순서 규칙)
-        if (rightIndex >= songs.length) {
-            leftIndex++;
-            rightIndex = leftIndex + 1;
-        }
+        // 한쪽 조의 비교가 끝나면 남은 곡들을 정렬 리스트에 붙입니다
+        if (headLeft >= leftArr.length || headRight >= rightArr.length) {
+            while (headLeft < leftArr.length) {
+                mid.push(leftArr[headLeft]);
+                headLeft++;
+            }
+            while (headRight < rightArr.length) {
+                mid.push(rightArr[headRight]);
+                headRight++;
+            }
+            
+            subList.push(mid);
+            mid = null;
 
-        // 모든 비교가 끝나면 결과 출력
-        if (leftIndex >= songs.length - 1 || battleNo > totalBattles * 1.5) {
-            finishSorter();
+            if (mainList.length === 0) {
+                mainList = subList;
+                if (mainList.length <= 1) {
+                    finishSorter();
+                    return;
+                }
+                subList = [];
+            }
+            executeMergeStep();
         } else {
             showBattle();
         }
     }
 
     function finishSorter() {
+        finishFlag = true;
         document.getElementById("battleInfo").innerHTML = "Battle No. End<br>100% sorted.";
         document.getElementById("sorterInterface").style.display = "none";
 
         let resultBody = document.getElementById("resultBody");
         resultBody.innerHTML = "";
 
-        let rankedSongs = songs.map(song => {
-            return { name: song, score: scoreMap[song] };
-        }).sort((a, b) => b.score - a.score);
+        let finalOrder = mainList[0] || [];
+        let rankedSongs = finalOrder.map(idx => {
+            return { name: songs[idx], score: scoreMap[songs[idx]] };
+        });
+
+        rankedSongs.sort((a, b) => b.score - a.score);
+
+        songs.forEach(song => {
+            if (!rankedSongs.some(item => item.name === song)) {
+                rankedSongs.push({ name: song, score: scoreMap[song] });
+            }
+        });
 
         rankedSongs.forEach((item, index) => {
             let row = `<tr><td>${index + 1}</td><td>${item.name}</td></tr>`;
@@ -266,7 +334,7 @@
     window.onload = function() {
         initSorter();
     };
-
+        
 </script>
 </body>
 </html>
