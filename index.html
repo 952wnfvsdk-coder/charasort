@@ -143,7 +143,7 @@
 </div>
 
 <script>
-    // 플레이브 공식 전곡 리스트 (노래 추가 시 기존 규칙대로 따옴표와 쉼표를 활용해 주세요)
+    // 플레이브 공식 전곡 리스트
     const songs = [
         "Wait For You", 
         "픽셀월드 (Pixel World)", 
@@ -162,158 +162,86 @@
         "RIDGE (틈)"
     ];
 
-    // 병합 정렬(Merge Sort) 기반의 실시간 양쪽 교체 소터 알고리즘
-    let leftIndex = 0;
-    let rightIndex = 0;
     let battleNo = 1;
     let scoreMap = {};
-    
-    let mainList = [];
-    let subList = [];
-    let headLeft = 0;
-    let headRight = 0;
-    let mid = 0;
-    let end = 0;
-    let pairList = [];
-    let finishFlag = false;
+    let totalBattles = 0;
+    let battlePairs = [];
+    let currentPairIndex = 0;
 
+    // 모든 가능한 대결 쌍을 만들고 무작위로 섞는 알고리즘
     function initSorter() {
         songs.forEach(song => { scoreMap[song] = 0; });
-        
-        // 초기 정렬 큐 배열 생성
-        mainList = songs.map((song, idx) => [idx]);
-        subList = [];
-        
-        prepareNextMerge();
+
+        // 1. 모든 곡의 대결 조합 생성 (예: 15곡이면 총 105개의 대결)
+        for (let i = 0; i < songs.length; i++) {
+            for (let j = i + 1; j < songs.length; j++) {
+                // 왼쪽/오른쪽도 랜덤하게 배치하기 위해 50% 확률로 순서 섞음
+                if (Math.random() > 0.5) {
+                    battlePairs.push([i, j]);
+                } else {
+                    battlePairs.push([j, i]);
+                }
+            }
+        }
+
+        // 2. 생성된 대결 묶음 전체를 완전 무작위로 shuffle (한쪽만 안 바뀌는 현상 100% 차단)
+        for (let i = battlePairs.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [battlePairs[i], battlePairs[j]] = [battlePairs[j], battlePairs[i]];
+        }
+
+        totalBattles = battlePairs.length;
+        showBattle();
     }
 
-    function prepareNextMerge() {
-        if (mainList.length <= 1) {
+    function showBattle() {
+        if (currentPairIndex >= totalBattles) {
             finishSorter();
             return;
         }
 
-        subList = [];
-        executeMergeStep();
-    }
+        let pair = battlePairs[currentPairIndex];
+        document.getElementById("leftTitle").textContent = songs[pair[0]];
+        document.getElementById("rightTitle").textContent = songs[pair[1]];
 
-    function executeMergeStep() {
-        if (mainList.length >= 2) {
-            let leftArr = mainList.shift();
-            let rightArr = mainList.shift();
-            pairList = [leftArr, rightArr];
-            headLeft = 0;
-            headRight = 0;
-            showBattle();
-        } else if (mainList.length === 1) {
-            subList.push(mainList.shift());
-            if (mainList.length === 0) {
-                mainList = subList;
-                prepareNextMerge();
-            }
-        } else {
-            mainList = subList;
-            prepareNextMerge();
-        }
-    }
-
-    function showBattle() {
-        if (finishFlag) return;
-        
-        let leftSongIdx = pairList[0][headLeft];
-        let rightSongIdx = pairList[1][headRight];
-
-        document.getElementById("leftTitle").textContent = songs[leftSongIdx];
-        document.getElementById("rightTitle").textContent = songs[rightSongIdx];
-
-        // 대략적인 진행률 계산 계산식
-        let totalEstimated = Math.ceil(songs.length * Math.log2(songs.length));
-        let progress = Math.min(99, Math.floor((battleNo / totalEstimated) * 100));
-        if (progress < 0) progress = 0;
-
+        let progress = Math.floor((currentPairIndex / totalBattles) * 100);
         document.getElementById("battleInfo").innerHTML = `Battle No. ${battleNo}<br>${progress}% sorted.`;
     }
 
     function sortSelect(choice) {
-        if (finishFlag) return;
+        if (currentPairIndex >= totalBattles) return;
 
-        let leftArr = pairList[0];
-        let rightArr = pairList[1];
-        
-        if (!mid) mid = [];
+        let pair = battlePairs[currentPairIndex];
+        let leftSong = songs[pair[0]];
+        let rightSong = songs[pair[1]];
 
-        // 선택에 따른 가중치 부여 및 리스트 병합 처리
         if (choice === 1) {
-            scoreMap[songs[leftArr[headLeft]]] += 2;
-            mid.push(leftArr[headLeft]);
-            headLeft++;
+            scoreMap[leftSong] += 2;
+            scoreMap[rightSong] -= 1;
         } else if (choice === 2) {
-            scoreMap[songs[rightArr[headRight]]] += 2;
-            mid.push(rightArr[headRight]);
-            headRight++;
+            scoreMap[rightSong] += 2;
+            scoreMap[leftSong] -= 1;
         } else {
-            // 둘다 좋다 / 모르겠다 선택 시 둘 다 점수 부여 후 순서대로 삽입
-            scoreMap[songs[leftArr[headLeft]]] += 1;
-            scoreMap[songs[rightArr[headRight]]] += 1;
-            mid.push(leftArr[headLeft]);
-            mid.push(rightArr[headRight]);
-            headLeft++;
-            headRight++;
+            scoreMap[leftSong] += 1;
+            scoreMap[rightSong] += 1;
         }
 
         battleNo++;
-
-        // 한쪽 배열이 끝나면 남은 배열을 모두 붙임
-        if (headLeft >= leftArr.length || headRight >= rightArr.length) {
-            while (headLeft < leftArr.length) {
-                mid.push(leftArr[headLeft]);
-                headLeft++;
-            }
-            while (headRight < rightArr.length) {
-                mid.push(rightArr[headRight]);
-                headRight++;
-            }
-            
-            subList.push(mid);
-            mid = null;
-
-            if (mainList.length === 0) {
-                mainList = subList;
-                if (mainList.length <= 1) {
-                    finishSorter();
-                    return;
-                }
-                subList = [];
-            }
-            executeMergeStep();
-        } else {
-            showBattle();
-        }
+        currentPairIndex++;
+        showBattle();
     }
 
     function finishSorter() {
-        finishFlag = true;
         document.getElementById("battleInfo").innerHTML = "Battle No. End<br>100% sorted.";
         document.getElementById("sorterInterface").style.display = "none";
 
         let resultBody = document.getElementById("resultBody");
         resultBody.innerHTML = "";
 
-        // 최종 병합 순서 및 가중치 점수를 조합하여 정렬
-        let finalOrder = mainList[0] || [];
-        let rankedSongs = finalOrder.map(idx => {
-            return { name: songs[idx], score: scoreMap[songs[idx]] };
-        });
-
-        // 만약 가중치가 동점일 경우를 대비해 스코어 역순 정렬 보완
-        rankedSongs.sort((a, b) => b.score - a.score);
-
-        // 예외 처리: 혹시 누락된 곡이 있다면 하단에 자동 추가
-        songs.forEach(song => {
-            if (!rankedSongs.some(item => item.name === song)) {
-                rankedSongs.push({ name: song, score: scoreMap[song] });
-            }
-        });
+        // 점수 기준으로 최종 순위 생성
+        let rankedSongs = songs.map(song => {
+            return { name: song, score: scoreMap[song] };
+        }).sort((a, b) => b.score - a.score);
 
         rankedSongs.forEach((item, index) => {
             let row = `<tr><td>${index + 1}</td><td>${item.name}</td></tr>`;
